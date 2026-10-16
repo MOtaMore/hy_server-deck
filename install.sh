@@ -55,9 +55,9 @@ if ! command -v cc &> /dev/null && ! command -v gcc &> /dev/null; then
     MISSING_PKGS+=("base-devel")
 fi
 
-# Check for glib-2.0 development files (glib-2.0.pc)
+# Check for glib-2.0 development files (glib-2.0.pc is provided by glib2-devel in Arch/SteamOS)
 if ! pkg-config --exists glib-2.0 2>/dev/null && [ ! -f "/usr/lib/pkgconfig/glib-2.0.pc" ] && [ ! -f "/usr/share/pkgconfig/glib-2.0.pc" ]; then
-    MISSING_PKGS+=("glib2")
+    MISSING_PKGS+=("glib2-devel")
 fi
 
 # Check for WebKitGTK 4.1
