@@ -60,6 +60,11 @@ if ! pkg-config --exists glib-2.0 2>/dev/null && [ ! -f "/usr/lib/pkgconfig/glib
     MISSING_PKGS+=("glib2-devel")
 fi
 
+# Check for gdk-3.0 / gtk3 development files (gdk-3.0.pc is provided by gtk3 in Arch/SteamOS)
+if ! pkg-config --exists gdk-3.0 2>/dev/null && [ ! -f "/usr/lib/pkgconfig/gdk-3.0.pc" ] && [ ! -f "/usr/share/pkgconfig/gdk-3.0.pc" ]; then
+    MISSING_PKGS+=("gtk3")
+fi
+
 # Check for WebKitGTK 4.1
 if ! ldconfig -p 2>/dev/null | grep -q "libwebkit2gtk-4.1.so.0" && [ ! -f "/usr/lib/libwebkit2gtk-4.1.so.0" ]; then
     MISSING_PKGS+=("webkit2gtk-4.1")
