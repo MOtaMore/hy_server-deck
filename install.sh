@@ -39,25 +39,53 @@ fi
 PODMAN_VER=$(podman --version)
 echo -e "${GREEN}✔ Podman detected:${NC} $PODMAN_VER"
 
-# 2. Check system dependencies (WebKitGTK 4.1 for Tauri)
-echo -e "${YELLOW}[2/5] Verifying WebKitGTK graphics library...${NC}"
+# 2. Check system & compilation dependencies (GLib, WebKitGTK, pkg-config, etc.)
+echo -e "${YELLOW}[2/5] Verifying system libraries and build dependencies...${NC}"
+export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH:-}"
+
+MISSING_PKGS=()
+
+# Check for pkg-config or pkgconf
+if ! command -v pkg-config &> /dev/null && ! command -v pkgconf &> /dev/null; then
+    MISSING_PKGS+=("pkgconf")
+fi
+
+# Check for C compiler
+if ! command -v cc &> /dev/null && ! command -v gcc &> /dev/null; then
+    MISSING_PKGS+=("base-devel")
+fi
+
+# Check for glib-2.0 development files (glib-2.0.pc)
+if ! pkg-config --exists glib-2.0 2>/dev/null && [ ! -f "/usr/lib/pkgconfig/glib-2.0.pc" ] && [ ! -f "/usr/share/pkgconfig/glib-2.0.pc" ]; then
+    MISSING_PKGS+=("glib2")
+fi
+
+# Check for WebKitGTK 4.1
 if ! ldconfig -p 2>/dev/null | grep -q "libwebkit2gtk-4.1.so.0" && [ ! -f "/usr/lib/libwebkit2gtk-4.1.so.0" ]; then
-    echo -e "${YELLOW}SteamOS does not include the 'webkit2gtk-4.1' library in its base image.${NC}"
-    echo -e "It is required to render the application's graphical user interface."
-    read -p "Do you want to install 'webkit2gtk-4.1' now with pacman (requires sudo)? (Y/n): " ans
+    MISSING_PKGS+=("webkit2gtk-4.1")
+fi
+
+if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
+    echo -e "${YELLOW}SteamOS is missing development packages required to compile Tauri apps:${NC}"
+    for pkg in "${MISSING_PKGS[@]}"; do
+        echo -e "  - ${CYAN}${pkg}${NC}"
+    done
+    echo ""
+    echo -e "SteamOS uses an immutable filesystem. We need to temporarily unlock it to install them via pacman."
+    read -p "Do you want to install missing packages now (${MISSING_PKGS[*]})? (Y/n): " ans
     if [[ "$ans" =~ ^([yYsS]|)$ ]]; then
-        echo -e "${CYAN}Unlocking filesystem and installing webkit2gtk-4.1...${NC}"
+        echo -e "${CYAN}Unlocking filesystem and installing packages...${NC}"
         sudo steamos-readonly disable
         sudo pacman-key --init
         sudo pacman-key --populate archlinux holo
-        sudo pacman -Sy --noconfirm webkit2gtk-4.1
+        sudo pacman -Sy --noconfirm "${MISSING_PKGS[@]}"
         sudo steamos-readonly enable
-        echo -e "${GREEN}✔ webkit2gtk-4.1 installed successfully.${NC}"
+        echo -e "${GREEN}✔ Missing packages installed successfully.${NC}"
     else
-        echo -e "${RED}Warning: The application will not be able to display its window without webkit2gtk-4.1.${NC}"
+        echo -e "${RED}Warning: Compilation will likely fail without ${MISSING_PKGS[*]}.${NC}"
     fi
 else
-    echo -e "${GREEN}✔ webkit2gtk-4.1 detected on system.${NC}"
+    echo -e "${GREEN}✔ All compilation and GUI dependencies detected on system.${NC}"
 fi
 
 # 3. Check Application Binary
@@ -98,23 +126,6 @@ if [ "$INSTALLED" = false ]; then
         npm run build
     fi
 
-    # Check C compiler ('cc') required by Cargo
-    if ! command -v cc &> /dev/null && ! command -v gcc &> /dev/null; then
-        echo -e "${YELLOW}SteamOS does not include the C compiler ('cc') by default (immutable filesystem).${NC}"
-        echo -e "Do you want to install 'base-devel' and 'webkit2gtk-4.1' via pacman (requires sudo)? (y/N)"
-        read -r resp
-        if [[ "$resp" =~ ^([yYsS])$ ]]; then
-            sudo steamos-readonly disable
-            sudo pacman-key --init
-            sudo pacman-key --populate archlinux holo
-            sudo pacman -Sy --noconfirm base-devel webkit2gtk-4.1
-            sudo steamos-readonly enable
-        else
-            echo -e "${RED}Compilation cancelled. Please build or use the pre-compiled binary in 'bin/hy-server-deck'.${NC}"
-            exit 1
-        fi
-    fi
-
     # Check Rust / Cargo
     if ! command -v cargo &> /dev/null; then
         echo -e "${YELLOW}Installing Rust and Cargo in user space...${NC}"
@@ -122,11 +133,14 @@ if [ "$INSTALLED" = false ]; then
         source "$HOME/.cargo/env" || export PATH="$HOME/.cargo/bin:$PATH"
     fi
 
+    export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:${PKG_CONFIG_PATH:-}"
     echo -e "${YELLOW}Compiling with Cargo in Release mode...${NC}"
     cd src-tauri
     cargo build --release
     cd ..
+    mkdir -p bin
     cp "src-tauri/target/release/hy-server-deck" "$INSTALL_DIR/hy-server-deck"
+    cp "src-tauri/target/release/hy-server-deck" "bin/hy-server-deck"
 fi
 
 # 4. Permissions and assets
