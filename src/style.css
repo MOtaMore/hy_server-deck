@@ -711,6 +711,162 @@ body {
 .log-line.error { color: #f87171; }
 .log-line.success { color: #4ade80; }
 
+.log-line.log-auth-highlight {
+  background: rgba(245, 158, 11, 0.15);
+  border-left: 3px solid #fbbf24;
+  padding: 4px 8px;
+  margin: 3px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: #fef08a;
+  font-weight: 500;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+}
+
+.term-link {
+  color: #22d3ee;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  word-break: break-all;
+}
+.term-link:hover {
+  color: #67e8f9;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+}
+
+/* Dedicated Hytale OAuth Device Verification Banner */
+.oauth-banner {
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(8, 145, 178, 0.2), rgba(245, 158, 11, 0.2));
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.25), inset 0 0 15px rgba(245, 158, 11, 0.1);
+  animation: oauthGlow 3s infinite alternate;
+}
+
+@keyframes oauthGlow {
+  0% { border-color: rgba(34, 211, 238, 0.4); box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+  100% { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 25px rgba(245, 158, 11, 0.35); }
+}
+
+.oauth-banner.hidden {
+  display: none !important;
+}
+
+.oauth-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.oauth-icon-pulse {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: rgba(6, 182, 212, 0.2);
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #22d3ee;
+  flex-shrink: 0;
+  animation: pulse 1.5s infinite;
+}
+
+.oauth-icon-pulse svg {
+  width: 24px;
+  height: 24px;
+}
+
+.oauth-details {
+  flex: 1;
+  min-width: 240px;
+}
+
+.oauth-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.oauth-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.oauth-tag {
+  background: rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.oauth-description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.oauth-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oauth-code-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.oauth-code-badge {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #22d3ee;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.05em;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.oauth-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.oauth-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.btn-pulse {
+  animation: btnPulse 2s infinite;
+}
+
+@keyframes btnPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+  50% { transform: scale(1.03); box-shadow: 0 0 25px rgba(6, 182, 212, 0.8); }
+}
+
 .terminal-input-bar {
   display: flex;
   align-items: center;

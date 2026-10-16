@@ -68,7 +68,11 @@ const elements = {
   btnRestartServer: document.getElementById("btn-restart-server"),
   btnDashboardRepair: document.getElementById("btn-dashboard-repair"),
   
-  // Terminal
+  // Terminal & OAuth
+  oauthBanner: document.getElementById("oauth-banner"),
+  oauthCodeVal: document.getElementById("oauth-code-val"),
+  btnCopyOAuthCode: document.getElementById("btn-copy-oauth-code"),
+  btnOpenOAuthLink: document.getElementById("btn-open-oauth-link"),
   terminalBody: document.getElementById("terminal-body"),
   chkAutoscroll: document.getElementById("chk-autoscroll"),
   btnClearLogs: document.getElementById("btn-clear-logs"),
@@ -275,17 +279,19 @@ async function refreshStatus() {
 }
 
 function updateUIWithStatus(status) {
+  const statusLower = (status.status || "").toLowerCase();
+
   // 1. Global Badge
   elements.podGlobalBadge.className = "status-pill";
-  if (status.status === "Running" && status.is_healthy) {
+  if (statusLower === "running" && status.is_healthy) {
     elements.podGlobalBadge.classList.add("status-running");
     elements.podGlobalText.textContent = t("status.running");
     elements.screensaverStatusBadge.textContent = t("screensaver.status_active");
-  } else if (status.desync_detected || status.status === "Degraded") {
+  } else if (status.desync_detected || statusLower === "degraded") {
     elements.podGlobalBadge.classList.add("status-degraded");
     elements.podGlobalText.textContent = t("status.degraded");
     elements.screensaverStatusBadge.textContent = t("status.attention_required");
-  } else if (status.status === "Stopped") {
+  } else if (statusLower === "stopped" || statusLower === "exited") {
     elements.podGlobalBadge.classList.add("status-stopped");
     elements.podGlobalText.textContent = t("status.server_stopped");
     elements.screensaverStatusBadge.textContent = t("status.server_stopped");
@@ -305,12 +311,15 @@ function updateUIWithStatus(status) {
 
   // 3. Card mc-pod / hy-pod
   elements.cardPodBadge.className = "badge";
-  if (status.status === "Running") {
+  if (statusLower === "running") {
     elements.cardPodBadge.classList.add("badge-green");
     elements.cardPodBadge.textContent = t("status.running");
-  } else if (status.status === "Degraded") {
+  } else if (statusLower === "degraded") {
     elements.cardPodBadge.classList.add("badge-yellow");
     elements.cardPodBadge.textContent = t("status.degraded");
+  } else if (statusLower === "not created") {
+    elements.cardPodBadge.classList.add("badge-gray");
+    elements.cardPodBadge.textContent = t("status.not_created");
   } else {
     elements.cardPodBadge.classList.add("badge-gray");
     elements.cardPodBadge.textContent = status.status;
@@ -328,7 +337,7 @@ function updateUIWithStatus(status) {
   const containers = status.containers || {};
   const serverCont = containers["hy-server"];
   elements.cardServerBadge.className = "badge";
-  if (serverCont && serverCont.status === "running") {
+  if (serverCont && serverCont.status.toLowerCase() === "running") {
     elements.cardServerBadge.classList.add("badge-green");
     elements.cardServerBadge.textContent = t("status.active");
   } else if (serverCont) {
@@ -341,7 +350,7 @@ function updateUIWithStatus(status) {
 
   const sshCont = containers["hy-ssh"];
   elements.cardSshBadge.className = "badge";
-  if (sshCont && sshCont.status === "running") {
+  if (sshCont && sshCont.status.toLowerCase() === "running") {
     elements.cardSshBadge.classList.add("badge-green");
     elements.cardSshBadge.textContent = t("status.active");
   } else {
@@ -351,34 +360,92 @@ function updateUIWithStatus(status) {
 }
 
 // ==========================================
-// LIVE LOG STREAMING
+// LIVE LOG STREAMING & OAUTH VERIFICATION
 // ==========================================
+let currentOAuthUrl = null;
+let currentOAuthCode = null;
+let authToastShown = false;
+
 async function streamLogs() {
-  if (!lastStatus || (lastStatus.status !== "Running" && lastStatus.status !== "Degraded")) {
+  const isPodActive = lastStatus && (
+    lastStatus.status.toLowerCase() === "running" ||
+    lastStatus.status.toLowerCase() === "degraded" ||
+    lastStatus.status.toLowerCase() === "created" ||
+    (lastStatus.containers && lastStatus.containers["hy-server"] !== undefined)
+  );
+
+  if (!isPodActive) {
     return;
   }
-  
+
   try {
-    const logs = await invoke("get_logs", { tail: 80 });
+    const logs = await invoke("get_logs", { tail: 200 });
     if (logs && logs !== lastLogText) {
       lastLogText = logs;
       renderLogs(logs);
+      checkForAuthVerification(logs);
     }
   } catch (err) {
     // Ignore harmless polling errors when container is inactive
   }
 }
 
+function checkForAuthVerification(logs) {
+  // Check for Hytale verification URL
+  const urlMatch = logs.match(/https?:\/\/[^\s"']*(?:hytale\.com|hypixel\.com)[^\s"']*/i);
+
+  // Check for user code
+  const codeMatch = logs.match(/user_code=([A-Z0-9-]+)/i) ||
+                    logs.match(/(?:code|user_code|código)[:\s]+([A-Z0-9-]{4,12})/i);
+
+  // Check if authentication completed
+  const authCompleted = logs.includes("Successfully authenticated") ||
+                        logs.includes("Authentication successful") ||
+                        logs.includes("Token saved") ||
+                        logs.includes("Game session created") ||
+                        logs.includes("Server ready");
+
+  if (urlMatch && !authCompleted) {
+    currentOAuthUrl = urlMatch[0];
+    currentOAuthCode = codeMatch ? codeMatch[1] : (currentOAuthUrl.split("user_code=")[1] || "");
+
+    if (elements.oauthBanner) {
+      elements.oauthBanner.classList.remove("hidden");
+      if (elements.oauthCodeVal) {
+        elements.oauthCodeVal.textContent = currentOAuthCode || "N/A";
+      }
+    }
+
+    if (!authToastShown) {
+      showToast(t("oauth.title") || "Hytale Verification Required!", "warning");
+      authToastShown = true;
+    }
+  } else if (authCompleted && elements.oauthBanner) {
+    elements.oauthBanner.classList.add("hidden");
+    currentOAuthUrl = null;
+    currentOAuthCode = null;
+    authToastShown = false;
+  }
+}
+
 function renderLogs(rawLogs) {
   const lines = rawLogs.split("\n");
   elements.terminalBody.innerHTML = "";
-  
+
   lines.forEach(line => {
     if (!line.trim()) return;
     const div = document.createElement("div");
     div.className = "log-line";
-    
-    if (line.includes("ERROR") || line.includes("Exception") || line.includes("Error") || line.includes("FATAL")) {
+
+    const isAuth = line.includes("oauth") ||
+                   line.includes("user_code") ||
+                   line.includes("AUTHENTICATION") ||
+                   line.includes("verify") ||
+                   line.includes("hytale.com");
+
+    if (isAuth) {
+      div.classList.add("log-auth-highlight");
+    } else if (line.includes("ERROR") || line.includes("Exception") || line.includes("Error") || line.includes("FATAL")) {
       div.classList.add("error");
     } else if (line.includes("WARN") || line.includes("Warning")) {
       div.classList.add("warn");
@@ -387,8 +454,38 @@ function renderLogs(rawLogs) {
     } else if (line.includes("INFO") || line.includes("ready")) {
       div.classList.add("info");
     }
-    
-    div.textContent = line;
+
+    // Replace URLs with clickable links
+    const urlRegex = /(https?:\/\/[^\s"']+)/g;
+    if (urlRegex.test(line)) {
+      div.innerHTML = "";
+      let lastIdx = 0;
+      urlRegex.lastIndex = 0;
+      let match;
+      while ((match = urlRegex.exec(line)) !== null) {
+        const textBefore = line.substring(lastIdx, match.index);
+        if (textBefore) div.appendChild(document.createTextNode(textBefore));
+
+        const targetUrl = match[0];
+        const a = document.createElement("a");
+        a.className = "term-link";
+        a.textContent = targetUrl;
+        a.href = "#";
+        a.title = "Click to open in browser / Clic para abrir en el navegador";
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          invoke("open_url", { url: targetUrl });
+          showToast(t("oauth.opening_browser") || "Opening verification URL...", "info");
+        });
+        div.appendChild(a);
+        lastIdx = urlRegex.lastIndex;
+      }
+      const textAfter = line.substring(lastIdx);
+      if (textAfter) div.appendChild(document.createTextNode(textAfter));
+    } else {
+      div.textContent = line;
+    }
+
     elements.terminalBody.appendChild(div);
   });
 
@@ -471,13 +568,34 @@ document.querySelectorAll(".btn-chip").forEach(btn => {
 // SERVER CONTROLS (START, STOP, RESTART, REPAIR)
 // ==========================================
 elements.btnStartServer.addEventListener("click", async () => {
-  showToast("Starting Hytale server...", "info");
+  showToast(t("controls.start") + "...", "info");
+
+  // Immediate visual feedback in terminal
+  const startDiv = document.createElement("div");
+  startDiv.className = "log-line info";
+  startDiv.textContent = "[Hy Server-Deck] Starting Hytale server... Initializing container & Podman pod.";
+  elements.terminalBody.appendChild(startDiv);
+  elements.terminalBody.scrollTop = elements.terminalBody.scrollHeight;
+
   try {
     const res = await invoke("start_server");
     showToast(res, "success");
-    setTimeout(refreshStatus, 1500);
+
+    const resDiv = document.createElement("div");
+    resDiv.className = "log-line success";
+    resDiv.textContent = `[Hy Server-Deck] ${res}`;
+    elements.terminalBody.appendChild(resDiv);
+    elements.terminalBody.scrollTop = elements.terminalBody.scrollHeight;
+
+    await refreshStatus();
+    await streamLogs();
   } catch (err) {
     showToast(err, "error");
+    const errDiv = document.createElement("div");
+    errDiv.className = "log-line error";
+    errDiv.textContent = `[Hy Server-Deck] Error: ${err}`;
+    elements.terminalBody.appendChild(errDiv);
+    elements.terminalBody.scrollTop = elements.terminalBody.scrollHeight;
   }
 });
 
@@ -732,6 +850,32 @@ document.querySelectorAll(".btn-copy").forEach(btn => {
     }
   });
 });
+
+// ==========================================
+// OAUTH VERIFICATION BUTTONS
+// ==========================================
+if (elements.btnOpenOAuthLink) {
+  elements.btnOpenOAuthLink.addEventListener("click", async () => {
+    if (currentOAuthUrl) {
+      try {
+        await invoke("open_url", { url: currentOAuthUrl });
+        showToast(t("oauth.opening_browser") || "Opening verification URL in browser...", "info");
+      } catch (err) {
+        window.open(currentOAuthUrl, "_blank");
+      }
+    }
+  });
+}
+
+if (elements.btnCopyOAuthCode) {
+  elements.btnCopyOAuthCode.addEventListener("click", () => {
+    if (currentOAuthCode) {
+      navigator.clipboard.writeText(currentOAuthCode).then(() => {
+        showToast(t("oauth.code_copied") || "Code copied to clipboard!", "success");
+      });
+    }
+  });
+}
 
 // ==========================================
 // STEAM INTEGRATION & TOOLS

@@ -73,12 +73,14 @@ impl PodmanEngine {
                     .trim()
                     .to_string();
 
-                if output.status.success() {
-                    (true, if stdout.is_empty() { clean_stderr } else { stdout })
-                } else {
-                    let err = if !clean_stderr.is_empty() { clean_stderr } else { stdout };
-                    (false, err)
-                }
+                let combined = match (stdout.is_empty(), clean_stderr.is_empty()) {
+                    (false, false) => format!("{}\n{}", stdout, clean_stderr),
+                    (false, true) => stdout,
+                    (true, false) => clean_stderr,
+                    (true, true) => String::new(),
+                };
+
+                (output.status.success(), combined)
             }
             Err(e) => (false, format!("Error al ejecutar podman: {}", e)),
         }
@@ -124,6 +126,15 @@ impl PodmanEngine {
             } else if let Some(status) = json_val.get("Status").and_then(|s| s.as_str()) {
                 pod_status_str = status.to_string();
             }
+
+            // Normalizar a Title Case estándar
+            pod_status_str = match pod_status_str.to_lowercase().as_str() {
+                "running" => "Running".to_string(),
+                "degraded" => "Degraded".to_string(),
+                "stopped" | "exited" => "Stopped".to_string(),
+                "created" => "Created".to_string(),
+                _ => pod_status_str,
+            };
 
             // Inspeccionar contenedores dentro del pod
             if let Some(containers) = json_val.get("Containers").and_then(|c| c.as_array()) {
@@ -192,7 +203,8 @@ impl PodmanEngine {
 
         // 1. Asegurar o crear el Pod hy-pod
         let pod_status = self.get_pod_status_detailed().await;
-        if pod_status.status == "Not Created" || pod_status.desync_detected {
+        let pod_missing = pod_status.status.to_lowercase() == "not created" || pod_status.status == "Unknown";
+        if pod_missing || pod_status.desync_detected {
             // Limpiar si había residuo desincronizado
             let _ = self.run_podman(&["pod", "rm", "-f", "hy-pod"]).await;
 
@@ -207,6 +219,9 @@ impl PodmanEngine {
             if !created {
                 return Err(format!("Error al crear el pod 'hy-pod': {}", out));
             }
+        } else {
+            // Asegurar que el pod esté en marcha
+            let _ = self.run_podman(&["pod", "start", "hy-pod"]).await;
         }
 
         // 2. Limpiar hy-server previo
@@ -273,6 +288,10 @@ impl PodmanEngine {
             return Err(format!("Error al iniciar hy-server: {}", server_out));
         }
 
+        // Asegurar que hy-pod y hy-server estén activos inmediatamente
+        let _ = self.run_podman(&["pod", "start", "hy-pod"]).await;
+        let _ = self.run_podman(&["start", "hy-server"]).await;
+
         // 4. Configurar hy-playit (Túnel Playit.gg)
         let _ = self.run_podman(&["stop", "-t", "5", "hy-playit"]).await;
         let _ = self.run_podman(&["rm", "-f", "hy-playit"]).await;
@@ -327,14 +346,28 @@ impl PodmanEngine {
         Ok("Servidor de Hytale desplegado y sincronizado correctamente en hy-pod.".to_string())
     }
 
-    /// Inicia el pod existente
+    /// Inicia el pod existente, o si el contenedor hy-server no ha sido desplegado, lo despliega automáticamente
     pub async fn start_pod(&self) -> Result<String, String> {
+        let status = self.get_pod_status_detailed().await;
+        let server_exists = status.containers.contains_key("hy-server");
+
+        // Si el pod no existe o hy-server no ha sido desplegado aún:
+        if status.status.to_lowercase() == "not created" || !server_exists {
+            let config = self.load_config();
+            return self.deploy_server(config).await;
+        }
+
         let _guard = self.operation_lock.lock().await;
-        let (ok, out) = self.run_podman(&["pod", "start", "hy-pod"]).await;
+        let (ok, _out) = self.run_podman(&["pod", "start", "hy-pod"]).await;
         if ok {
-            Ok("Pod de Hytale iniciado exitosamente.".to_string())
+            // Asegurar que hy-server también arranque si estaba detenido
+            let _ = self.run_podman(&["start", "hy-server"]).await;
+            Ok("Pod y servidor de Hytale iniciados correctamente.".to_string())
         } else {
-            Err(format!("Error al iniciar el pod: {}", out))
+            // Si falló iniciar hy-pod (por ejemplo estado inconsistente), re-desplegar de forma limpia
+            drop(_guard);
+            let config = self.load_config();
+            self.deploy_server(config).await
         }
     }
 
@@ -433,14 +466,44 @@ impl PodmanEngine {
         }
     }
 
-    /// Obtiene las últimas líneas de logs de hy-server
+    /// Obtiene las últimas líneas de logs de hy-server combinando stdout y stderr de forma íntegra
     pub async fn get_server_logs(&self, tail_lines: usize) -> Result<String, String> {
         let tail_str = tail_lines.to_string();
-        let (ok, out) = self.run_podman(&["logs", "--tail", &tail_str, "hy-server"]).await;
-        if ok {
-            Ok(out)
-        } else {
-            Err(out)
+        let mut cmd = Command::new("podman");
+        cmd.env_remove("LD_PRELOAD");
+        cmd.args(&["logs", "--tail", &tail_str, "hy-server"]);
+        cmd.stdout(Stdio::piped());
+        cmd.stderr(Stdio::piped());
+
+        match cmd.output().await {
+            Ok(output) => {
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                let stderr = String::from_utf8_lossy(&output.stderr);
+
+                let clean_stderr = stderr
+                    .lines()
+                    .filter(|l| !l.contains("gameoverlayrenderer.so") && !l.contains("wrong ELF class"))
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                let mut combined = String::new();
+                if !stdout.trim().is_empty() {
+                    combined.push_str(stdout.trim());
+                }
+                if !clean_stderr.trim().is_empty() {
+                    if !combined.is_empty() {
+                        combined.push('\n');
+                    }
+                    combined.push_str(clean_stderr.trim());
+                }
+
+                if output.status.success() || !combined.is_empty() {
+                    Ok(combined)
+                } else {
+                    Err("No se pudieron obtener registros de hy-server.".to_string())
+                }
+            }
+            Err(e) => Err(format!("Error al ejecutar podman logs: {}", e)),
         }
     }
 

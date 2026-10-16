@@ -87,3 +87,22 @@ pub async fn save_config(
 pub async fn install_shortcuts() -> Result<String, String> {
     SteamOSHelper::install_desktop_shortcuts(None)
 }
+
+#[tauri::command]
+pub async fn open_url(url: String) -> Result<(), String> {
+    #[cfg(target_os = "linux")]
+    {
+        tokio::process::Command::new("xdg-open")
+            .arg(&url)
+            .spawn()
+            .map_err(|e| format!("Error xdg-open: {}", e))?;
+    }
+    #[cfg(target_os = "windows")]
+    {
+        tokio::process::Command::new("cmd")
+            .args(&["/C", "start", "", &url])
+            .spawn()
+            .map_err(|e| format!("Error opening browser: {}", e))?;
+    }
+    Ok(())
+}

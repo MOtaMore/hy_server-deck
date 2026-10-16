@@ -30,6 +30,17 @@ export const translations = {
     "status.not_available": "Not available",
     "status.no_public_ip": "No Public IP detected",
 
+    // OAuth Verification Banner
+    "oauth.title": "Hytale Account Verification Required",
+    "oauth.pending": "Action Needed",
+    "oauth.description": "Your Hytale server is waiting for you to authorize your account in the browser to download assets and start the server.",
+    "oauth.user_code": "Verification Code:",
+    "oauth.copy_code": "Copy Code",
+    "oauth.open_browser": "Open Verification URL",
+    "oauth.hint": "Opens your Steam Deck default browser automatically",
+    "oauth.opening_browser": "Opening verification URL in browser...",
+    "oauth.code_copied": "Verification code copied to clipboard!",
+
     // Anti-Desync Banner
     "alert.desync_title": "Desynchronization detected in Pod:",
     "alert.desync_default_reason": "The Hytale container is not responding within the pod.",
@@ -185,6 +196,17 @@ export const translations = {
     "status.public_ip": "IP Pública",
     "status.not_available": "No disponible",
     "status.no_public_ip": "Sin IP Pública detectada",
+
+    // OAuth Verification Banner
+    "oauth.title": "Verificación de Cuenta de Hytale Requerida",
+    "oauth.pending": "Acción Requerida",
+    "oauth.description": "El servidor de Hytale está esperando a que vincules tu cuenta en el navegador para descargar los archivos y encender el servidor.",
+    "oauth.user_code": "Código de Verificación:",
+    "oauth.copy_code": "Copiar Código",
+    "oauth.open_browser": "Abrir Enlace de Verificación",
+    "oauth.hint": "Abre automáticamente el navegador predeterminado de tu Steam Deck",
+    "oauth.opening_browser": "Abriendo enlace de verificación en el navegador...",
+    "oauth.code_copied": "¡Código de verificación copiado al portapapeles!",
 
     // Anti-Desync Banner
     "alert.desync_title": "Desincronización detectada en el Pod:",
@@ -342,6 +364,17 @@ export const translations = {
     "status.not_available": "Non disponible",
     "status.no_public_ip": "Aucune IP Publique détectée",
 
+    // OAuth Verification Banner
+    "oauth.title": "Vérification du Compte Hytale Requise",
+    "oauth.pending": "Action Requise",
+    "oauth.description": "Votre serveur Hytale attend que vous autorisiez votre compte dans le navigateur pour télécharger les fichiers et démarrer.",
+    "oauth.user_code": "Code de Vérification :",
+    "oauth.copy_code": "Copier le Code",
+    "oauth.open_browser": "Ouvrir l'URL de Vérification",
+    "oauth.hint": "Ouvre automatiquement le navigateur par défaut de votre Steam Deck",
+    "oauth.opening_browser": "Ouverture de l'URL de vérification dans le navigateur...",
+    "oauth.code_copied": "Code de vérification copié dans le presse-papiers !",
+
     // Anti-Desync Banner
     "alert.desync_title": "Désynchronisation détectée dans le Pod :",
     "alert.desync_default_reason": "Le conteneur Hytale ne répond pas dans le pod.",
@@ -497,6 +530,17 @@ export const translations = {
     "status.public_ip": "IP Público",
     "status.not_available": "Não disponível",
     "status.no_public_ip": "Nenhum IP Público detectado",
+
+    // OAuth Verification Banner
+    "oauth.title": "Verificação de Conta Hytale Necessária",
+    "oauth.pending": "Ação Necessária",
+    "oauth.description": "O seu servidor de Hytale está aguardando você autorizar sua conta no navegador para baixar arquivos e iniciar o servidor.",
+    "oauth.user_code": "Código de Verificação:",
+    "oauth.copy_code": "Copiar Código",
+    "oauth.open_browser": "Abrir Link de Verificação",
+    "oauth.hint": "Abre automaticamente o navegador padrão do seu Steam Deck",
+    "oauth.opening_browser": "Abrindo link de verificação no navegador...",
+    "oauth.code_copied": "Código de verificação copiado para a área de transferência!",
 
     // Anti-Desync Banner
     "alert.desync_title": "Dessincronização detectada no Pod:",
