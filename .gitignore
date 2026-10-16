@@ -1,0 +1,21 @@
+# Rust / Cargo
+src-tauri/target/
+**/*.rs.bk
+Cargo.lock
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri
+src-tauri/gen/
+
+# References / Temp
+mc_server-deck/
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
