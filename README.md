@@ -1,4 +1,4 @@
-# 🎮 HY Server-Deck (Rust Edition)
+# 🎮 Hy Server-Deck (Rust Edition)
 
 **English** • [Español](README.es.md)
 
@@ -74,7 +74,7 @@ The script will configure directories, build the frontend and binary (or use the
 
 1. In Desktop Mode, open the **Steam** desktop client.
 2. In the top menu, click **Games** -> **Add a Non-Steam Game to My Library...**.
-3. Select **HY Server-Deck** (or browse to `~/.local/share/hy-server-deck/hy-server-deck`).
+3. Select **Hy Server-Deck** (or browse to `~/.local/share/hy-server-deck/hy-server-deck`).
 4. Click **Add Selected Programs**.
 5. Switch back to **Gaming Mode**. The application is ready to launch with full 1280x800 touch screen and controller support!
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "HY Server Deck",
+  "productName": "Hy Server-Deck",
   "version": "1.0.0",
   "identifier": "com.hyserverdeck.hydeck",
   "build": {
@@ -10,7 +10,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "HY Server Deck",
+        "title": "Hy Server-Deck",
         "width": 1280,
         "height": 800,
         "minWidth": 960,

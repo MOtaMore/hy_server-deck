@@ -1,4 +1,4 @@
-// Internationalization (i18n) Module for HY Server Deck
+// Internationalization (i18n) Module for Hy Server-Deck
 // Primary / Default language: English (en)
 // Fallback / Supported languages: Spanish (es), French (fr), Portuguese (pt)
 
@@ -9,7 +9,7 @@ export const translations = {
     "nav.config": "Configuration",
     "nav.network": "Network & Access",
     "nav.tools": "Tools & Steam",
-    "header.title": "HY Server Deck",
+    "header.title": "Hy Server-Deck",
     "header.subtitle": "Hytale Dedicated Server • Podman Native • SteamOS",
     "header.screensaver_title": "OLED Screensaver Mode (Anti-Burn-In)",
 
@@ -68,7 +68,7 @@ export const translations = {
     "terminal.title": "Server Console (Live Logs & Commands)",
     "terminal.autoscroll": "Auto-Scroll",
     "terminal.clear": "Clear",
-    "terminal.initial_ready": "[HY Server Deck] Ready. Click 'Start Server' to begin.",
+    "terminal.initial_ready": "[Hy Server-Deck] Ready. Click 'Start Server' to begin.",
     "terminal.cleared_locally": "[Console cleared locally]",
     "terminal.input_placeholder": "Type a Hytale command (e.g. /help, /op add Player, /time set day)...",
     "terminal.send": "Send",
@@ -165,7 +165,7 @@ export const translations = {
     "nav.config": "Configuración",
     "nav.network": "Red y Conectividad",
     "nav.tools": "Herramientas y Steam",
-    "header.title": "HY Server Deck",
+    "header.title": "Hy Server-Deck",
     "header.subtitle": "Servidor Dedicado Hytale • Podman Nativo • SteamOS",
     "header.screensaver_title": "Modo Salvapantallas OLED (Anti-Quemado)",
 
@@ -224,7 +224,7 @@ export const translations = {
     "terminal.title": "Consola del Servidor (Logs en Vivo y Comandos)",
     "terminal.autoscroll": "Auto-Desplazamiento",
     "terminal.clear": "Limpiar",
-    "terminal.initial_ready": "[HY Server Deck] Listo. Haz clic en 'Iniciar Servidor' para comenzar.",
+    "terminal.initial_ready": "[Hy Server-Deck] Listo. Haz clic en 'Iniciar Servidor' para comenzar.",
     "terminal.cleared_locally": "[Consola limpiada localmente]",
     "terminal.input_placeholder": "Escribe un comando de Hytale (ej. /help, /op add Jugador, /time set day)...",
     "terminal.send": "Enviar",
@@ -321,7 +321,7 @@ export const translations = {
     "nav.config": "Configuration",
     "nav.network": "Réseau et Accès",
     "nav.tools": "Outils et Steam",
-    "header.title": "HY Server Deck",
+    "header.title": "Hy Server-Deck",
     "header.subtitle": "Serveur Dédié Hytale • Podman Natif • SteamOS",
     "header.screensaver_title": "Mode Écran de Veille OLED (Anti-Brûlure)",
 
@@ -380,7 +380,7 @@ export const translations = {
     "terminal.title": "Console du Serveur (Journaux en Direct & Commandes)",
     "terminal.autoscroll": "Défilement Auto",
     "terminal.clear": "Effacer",
-    "terminal.initial_ready": "[HY Server Deck] Prêt. Cliquez sur 'Démarrer le Serveur' pour commencer.",
+    "terminal.initial_ready": "[Hy Server-Deck] Prêt. Cliquez sur 'Démarrer le Serveur' pour commencer.",
     "terminal.cleared_locally": "[Console effacée localement]",
     "terminal.input_placeholder": "Tapez une commande Hytale (ex. /help, /op add Joueur, /time set day)...",
     "terminal.send": "Envoyer",
@@ -477,7 +477,7 @@ export const translations = {
     "nav.config": "Configuração",
     "nav.network": "Rede e Acesso",
     "nav.tools": "Ferramentas e Steam",
-    "header.title": "HY Server Deck",
+    "header.title": "Hy Server-Deck",
     "header.subtitle": "Servidor Dedicado Hytale • Podman Nativo • SteamOS",
     "header.screensaver_title": "Modo Protetor de Tela OLED (Anti-Burn-In)",
 
@@ -536,7 +536,7 @@ export const translations = {
     "terminal.title": "Console do Servidor (Logs ao Vivo e Comandos)",
     "terminal.autoscroll": "Rolagem Automática",
     "terminal.clear": "Limpar",
-    "terminal.initial_ready": "[HY Server Deck] Pronto. Clique em 'Iniciar Servidor' para começar.",
+    "terminal.initial_ready": "[Hy Server-Deck] Pronto. Clique em 'Iniciar Servidor' para começar.",
     "terminal.cleared_locally": "[Console limpo localmente]",
     "terminal.input_placeholder": "Digite um comando do Hytale (ex: /help, /op add Jogador, /time set day)...",
     "terminal.send": "Enviar",

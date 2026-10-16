@@ -23,7 +23,7 @@ impl SteamOSHelper {
 
         let desktop_content = format!(
             r#"[Desktop Entry]
-Name=HY Server-Deck
+Name=Hy Server-Deck
 Comment=Servidor de Hytale nativo en Podman para Steam Deck
 Exec="{}"
 Icon={}
@@ -41,8 +41,8 @@ StartupNotify=true
         let _ = fs::create_dir_all(&desktop_dir);
         let _ = fs::create_dir_all(&app_dir);
 
-        let desktop_file = desktop_dir.join("HY-Server-Deck.desktop");
-        let app_file = app_dir.join("HY-Server-Deck.desktop");
+        let desktop_file = desktop_dir.join("Hy-Server-Deck.desktop");
+        let app_file = app_dir.join("Hy-Server-Deck.desktop");
 
         let res1 = fs::write(&desktop_file, &desktop_content);
         let res2 = fs::write(&app_file, &desktop_content);

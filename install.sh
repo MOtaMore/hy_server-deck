@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# HY Server-Deck: Official Installer for Steam Deck (SteamOS / Arch Linux)
+# Hy Server-Deck: Official Installer for Steam Deck (SteamOS / Arch Linux)
 # Version: 1.0 (Rust + Tauri Native Engine with Rootless Podman)
 # ==============================================================================
 
@@ -17,7 +17,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}====================================================${NC}"
-echo -e "${BLUE}     HY Server-Deck: Steam Deck Installer           ${NC}"
+echo -e "${BLUE}     Hy Server-Deck: Steam Deck Installer           ${NC}"
 echo -e "${BLUE}   Hytale Dedicated Server with Rootless Podman     ${NC}"
 echo -e "${BLUE}====================================================${NC}"
 echo ""
@@ -137,7 +137,7 @@ cp assets/icon.png "$INSTALL_DIR/assets/icon.png"
 # 5. Create SteamOS shortcuts
 echo -e "${YELLOW}[5/5] Creating SteamOS shortcuts...${NC}"
 DESKTOP_ENTRY="[Desktop Entry]
-Name=HY Server-Deck
+Name=Hy Server-Deck
 Comment=Native Podman Hytale Dedicated Server for Steam Deck
 Exec=$INSTALL_DIR/hy-server-deck
 Icon=$INSTALL_DIR/assets/icon.png
@@ -146,14 +146,14 @@ Type=Application
 Categories=Game;Utility;
 StartupNotify=true"
 
-echo "$DESKTOP_ENTRY" > "$HOME/Desktop/HY-Server-Deck.desktop"
-echo "$DESKTOP_ENTRY" > "$HOME/.local/share/applications/HY-Server-Deck.desktop"
-chmod +x "$HOME/Desktop/HY-Server-Deck.desktop"
-chmod +x "$HOME/.local/share/applications/HY-Server-Deck.desktop"
+echo "$DESKTOP_ENTRY" > "$HOME/Desktop/Hy-Server-Deck.desktop"
+echo "$DESKTOP_ENTRY" > "$HOME/.local/share/applications/Hy-Server-Deck.desktop"
+chmod +x "$HOME/Desktop/Hy-Server-Deck.desktop"
+chmod +x "$HOME/.local/share/applications/Hy-Server-Deck.desktop"
 
 echo ""
 echo -e "${GREEN}====================================================${NC}"
-echo -e "${GREEN}    ✔ HY Server-Deck Installation Complete!        ${NC}"
+echo -e "${GREEN}    ✔ Hy Server-Deck Installation Complete!        ${NC}"
 echo -e "${GREEN}====================================================${NC}"
 echo ""
 echo -e "You can launch the application from the shortcut on your ${YELLOW}Desktop${NC}."
@@ -161,6 +161,6 @@ echo ""
 echo -e "${BLUE}To add it to Gaming Mode:${NC}"
 echo "1. Open Steam in Desktop Mode."
 echo "2. Click 'Games' -> 'Add a Non-Steam Game to My Library...'."
-echo "3. Select 'HY Server-Deck' from the list (or browse to $INSTALL_DIR/hy-server-deck)."
+echo "3. Select 'Hy Server-Deck' from the list (or browse to $INSTALL_DIR/hy-server-deck)."
 echo "4. Done! Return to Gaming Mode and enjoy at 1280x800 with touch and controller support."
 echo ""
